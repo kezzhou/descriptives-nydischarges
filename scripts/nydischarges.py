@@ -19,16 +19,21 @@ import pandas.plotting as pdp
 
 df = pd.read_csv('data/Hospital_Inpatient_Discharges__SPARCS_De-Identified___2016.csv')
 
+df[['Total Costs', 'Total Charges']] = df[['Total Costs', 'Total Charges']].apply(lambda x: x.str.replace(',', '')) ## let's remove the commas in these column strings to prepare for conversion to float
+
+df[['Total Costs', 'Total Charges']] = df[['Total Costs', 'Total Charges']].astype(float) ## converting the dtype of these columns to float64
+
+df.dtypes
+
 newdf = df.drop(df.loc[339:].index, inplace=True) ## drops rows beyond row 339. all rows retain their original row number
 
 newdf = df.dropna(axis=0) ## this will drop rows with nan values
-
-newdf.shape
 
 newdf.dtypes
 
 newdf.to_csv('data/new_SPARCS.csv') ## setting the new csv into stone
 
+newdf.dtypes
 
 
 #### Building a table with TableOne ####
@@ -43,7 +48,7 @@ df.columns
 
 df.head(5)
 
-df_columns = ['Length of Stay', 'Gender', 'Ethnicity']
+df_columns = ['Length of Stay', 'Gender', 'Ethnicity', 'Total Charges', 'Total Costs']
 
 df_categories = ['Gender', 'Ethnicity']
 
@@ -69,7 +74,7 @@ df.columns
 
 df.dtypes
 
-rp.summary_cont(df[['Length of Stay', 'Birth Weight']])
+rp.summary_cont(df[['Length of Stay', 'Birth Weight', 'Total Charges', 'Total Costs']])
 
 rp.summary_cat(df[['Health Service Area', 'Hospital County', 'Emergency Department Indicator', 'Abortion Edit Indicator', 'Payment Typology 1', 'Payment Typology 2', 'Payment Typology 3', 'APR Medical Surgical Description', 'APR Risk of Mortality', 'APR Severity of Illness Description', 'APR Severity of Illness Code', 'APR MDC Description', 'APR MDC Code', 'APR DRG Description', 'APR DRG Code', 'CCS Procedure Description']])
 
@@ -82,10 +87,19 @@ df.describe() ## to get a sweeping descriptive stat summary we can use .describe
 groupby_gender = df.groupby('Gender')
 for gender, value in groupby_gender['Length of Stay']:
     print(
-        gender, np.log(value.mean())
+        gender, value.mean()
+        )
+        
+
+## the average stay for Females is 3.4 days and the average stay for Males is 4.2 days
+
+groupby_gender = df.groupby('Age Group')
+for gender, value in groupby_gender['Total Costs']:
+    print(
+        gender, value.mean()
         )
 
-## the average stay for Females is 1.2 days and the average stay for Males is 1.4 days
+## average total costs by age group
 
 #### Visualization ####
 
@@ -103,7 +117,7 @@ ax.pie((x, y), labels=('F', 'M'), autopct='%1.1f%%')
 
 plt.show()
 
-## now let's do a bar chart for Age Group
+## now let's do a bar chart for Patient Count by Age Group
 
 df['Age Group'].value_counts()
 
@@ -121,8 +135,24 @@ plt.title('Patient Count by Age Group')
 
 plt.show()
 
+## we can also use the average total costs data we calculated for age group for another bar graph.
+
+x = ['0 to 17', '18 to 29', '30 to 49', '50 to 69', '70 or Older']
+
+h = [2292.44, 6737.88, 8802.99, 13047.52, 16813.72]
+
+plt.bar(x, h)
+
+plt.xlabel('Age Group')
+
+plt.ylabel('Average Total Costs')
+
+plt.title('Average Total Costs by Age Group')
+
+plt.show()
+
 
 ## Scatter matrices 
 
 pdp.scatter_matrix(
-    df[['Length of Stay', 'Birth Weight']] ## unfortunately the dataset leaves much to be desired for by way of numerical data
+    df[['Length of Stay', 'Birth Weight', 'Total Charges', 'Total Costs']] ## unfortunately the dataset leaves much to be desired for by way of numerical data
