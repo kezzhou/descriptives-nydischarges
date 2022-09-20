@@ -155,4 +155,4 @@ plt.show()
 ## Scatter matrices 
 
 pdp.scatter_matrix(
-    df[['Length of Stay', 'Birth Weight', 'Total Charges', 'Total Costs']] ## unfortunately the dataset leaves much to be desired for by way of numerical data
+    df[['Length of Stay', 'Birth Weight', 'Total Charges', 'Total Costs']]
